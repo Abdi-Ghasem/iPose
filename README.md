@@ -27,3 +27,5 @@
 *9 - Develop visual/LiDAR-aided IMU navigation system in Python.*
 
 *10 - Develop image/point cloud understanding/translation (multi-tasking) in Python.*
+
+![sample](sample.png)
