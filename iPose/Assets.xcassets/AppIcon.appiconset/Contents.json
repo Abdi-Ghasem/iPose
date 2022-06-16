@@ -31,11 +31,13 @@
       "size" : "40x40"
     },
     {
+      "filename" : "img (1)-1.jpeg",
       "idiom" : "iphone",
       "scale" : "2x",
       "size" : "60x60"
     },
     {
+      "filename" : "img (1).jpeg",
       "idiom" : "iphone",
       "scale" : "3x",
       "size" : "60x60"
@@ -72,6 +74,11 @@
     },
     {
       "idiom" : "ipad",
+      "scale" : "1x",
+      "size" : "76x76"
+    },
+    {
+      "idiom" : "ipad",
       "scale" : "2x",
       "size" : "76x76"
     },
@@ -81,6 +88,7 @@
       "size" : "83.5x83.5"
     },
     {
+      "filename" : "img (1)-2.jpeg",
       "idiom" : "ios-marketing",
       "scale" : "1x",
       "size" : "1024x1024"
