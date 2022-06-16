@@ -28,7 +28,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
             self.motion.startGyroUpdates()
             self.motion.startAccelerometerUpdates()
             self.motion.startMagnetometerUpdates()
-            self.motion.startDeviceMotionUpdates()
+            self.motion.startDeviceMotionUpdates(using: CMAttitudeReferenceFrame.xTrueNorthZVertical)
             
             self.location.requestWhenInUseAuthorization()
             self.location.startUpdatingLocation()
