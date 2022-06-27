@@ -8,9 +8,9 @@
 
 *This is a side project to me in swarm robotics. TODO:*
 
-*1 - Send iPhone's measurement into Python.*
+*1 - Send iPhone's measurement into Python (done on June 19th, 2022 via flask_socketio).*
 
-*2 - Display iPhone's measurement in Python.* 
+*2 - Display iPhone's measurement in Python (done on June 25th, 2022 via matplotlib).* 
 
 *3 - Create a simple UI for the app with start/stop button.*
 
