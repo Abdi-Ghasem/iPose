@@ -14,7 +14,7 @@
 
 *3 - Create a simple UI for the app with start/stop button.*
 
-*4 - Develope GPS aided IMU navigation system in Python.*
+*4 - Develop GPS aided IMU navigation system in Python.*
 
 *5 - Get iPhone's 3D point clouds.*
 
@@ -22,10 +22,8 @@
 
 *7 - Display iPhone's 3D point clouds in Python.*
 
-*8 - Develope visual/LiDAR-aided 3D mapping system in Python.*
+*8 - Develop visual/LiDAR-aided 3D mapping system in Python.*
 
 *9 - Develop visual/LiDAR-aided IMU navigation system in Python.*
 
 *10 - Develop image/point cloud understanding/translation (multi-tasking) in Python.*
-
-![sample](sample.png)
