@@ -12,7 +12,7 @@
 
 *2 - Display iPhone's measurement in Python (done on June 25th, 2022 via matplotlib; updated on November 24th, 2022).* 
 
-*3 - Create a simple UI for the app with start/stop button.*
+*3 - Create a simple UI for the app with start/stop button (done on November 25th, 2022 using Storyboard).*
 
 *4 - Get iPhone's 3D point clouds.*
 
