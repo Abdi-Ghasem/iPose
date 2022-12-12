@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import ARKit
 import CoreMotion
 
 class ViewController: UIViewController, UITextFieldDelegate {
@@ -37,18 +38,33 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     var timer: Timer!
     var responseLabelText = ""
+    let arReceiver = ARReceiver()
     let motion = CMMotionManager()
+    
+    func createDataFromPixelBuffer(pixelBuffer: CVPixelBuffer) -> Data {
+        // A utility function that creates Data from PixelBuffer, adopted from https://github.com/StuckiSimon/ar-streaming/blob/2d37f5afc6d6d626fb4caa460408f3eeadb77c68/ios-streaming-app/ios-streaming-app/Services/WebRTCClient.swift
+        CVPixelBufferLockBaseAddress(pixelBuffer, [.readOnly])
+        defer { CVPixelBufferUnlockBaseAddress(pixelBuffer, [.readOnly]) }
+
+        let source = CVPixelBufferGetBaseAddress(pixelBuffer)
+        let totalSize = CVPixelBufferGetDataSize(pixelBuffer)
+        guard let rawFrame = malloc(totalSize) else {fatalError("failed to alloc " + String(totalSize))}
+        memcpy(rawFrame, source, totalSize)
+
+        return Data(bytesNoCopy: rawFrame, count: totalSize, deallocator: .free)
+    }
     
     @IBAction func connectButtonAction(_ sender: Any) {
         let IP = "http://" + IPTextField.text! + "/"
         let rate = Double(rateTextField.text!) ?? 30.0
         
-        // Verify that the gyroscopes and accelerometers are available
-        if motion.isGyroAvailable && motion.isAccelerometerAvailable {
+        // Verify that the gyroscopes, accelerometers, and LiDAR are available
+        if motion.isGyroAvailable && motion.isAccelerometerAvailable && ARWorldTrackingConfiguration.supportsFrameSemantics([.sceneDepth, .smoothedSceneDepth]) {
             motion.gyroUpdateInterval = 1.0 / rate
             motion.accelerometerUpdateInterval = 1.0 / rate
             
-            // Start the delivery of rotation and acceleration
+            // Start the delivery of rotation, acceleration, LiDAR data
+            arReceiver.start()
             motion.startGyroUpdates()
             motion.startAccelerometerUpdates()
             
@@ -70,6 +86,12 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     messageData.append(withUnsafeBytes(of: accl.acceleration.x) { Data($0) })
                     messageData.append(withUnsafeBytes(of: accl.acceleration.y) { Data($0) })
                     messageData.append(withUnsafeBytes(of: accl.acceleration.z) { Data($0) })
+                }
+                
+                // Get the LiDAR data
+                messageData.append("dpth".data(using: .ascii)!)
+                if let depth = arReceiver.arData.depthImage {
+                    messageData.append(createDataFromPixelBuffer(pixelBuffer: depth))
                 }
                 
                 // Compress the message data
@@ -116,6 +138,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
             timer = nil
             
             // Stop the delivery of rotation and acceleration
+            arReceiver.pause()
             motion.stopGyroUpdates()
             motion.stopAccelerometerUpdates()
             
