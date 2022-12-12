@@ -1,8 +1,10 @@
 # Original Author       : Ghasem Abdi, ghasem.abdi@yahoo.com
-# File Last Update Date : November 24, 2022
+# File Last Update Date : December 12, 2022
 
 # Import dependencies
 import csv
+import struct
+import liblzfse
 import socketio
 import numpy as np
 import pandas as pd
@@ -75,26 +77,32 @@ fig.canvas.manager.set_window_title('iSensors')
 
 # Initiate a csv file for writing iSensors
 writeCSV = write2csv('iSensors.csv', header=[
-                     'idx', 'r_t', 'r_x', 'r_y', 'r_z', 'a_t', 'a_x', 'a_y', 'a_z'])
+                     'idx', 'r_x', 'r_y', 'r_z', 'a_x', 'a_y', 'a_z'])
 
 
 # Create socketio events
 @sio.event
 def connect():
-    print('user has connected to server!')
+    print('Connected to the Server ...')
 
 
 @sio.event
-def message(iSensors):
-    gyro_data = iSensors['gyroData']
-    accl_data = iSensors['acclData']
-    writeCSV.update({'idx': next(idx), 'r_t': gyro_data[0], 'r_x': gyro_data[1], 'r_y': gyro_data[2],
-                    'r_z': gyro_data[3], 'a_t': accl_data[0], 'a_x': accl_data[1], 'a_y': accl_data[2], 'a_z': accl_data[3]})
+def message(data):
+    # Decompress data
+    decompressed_data = liblzfse.decompress(data)
+
+    # Decode the received data into iSensors
+    gyro = np.array(struct.unpack('ddd', decompressed_data[decompressed_data.find(
+        b'gyro')+4:decompressed_data.find(b'accl')]), dtype=np.double)
+    accl = np.array(struct.unpack(
+        'ddd', decompressed_data[decompressed_data.find(b'accl')+4:]), dtype=np.double)
+    writeCSV.update({'idx': next(idx), 'r_x': gyro[0], 'r_y': gyro[1],
+                    'r_z': gyro[2], 'a_x': accl[0], 'a_y': accl[1], 'a_z': accl[2]})
 
 
 @sio.event
 def disconnect():
-    print('user has disconnected from server!')
+    print('Disconnected from the Server ...')
 
 
 # Connect to the server and animate real-time plotting

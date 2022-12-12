@@ -1,95 +1,92 @@
-// Original Author       : Ghasem Abdi, ghasem.abdi@yahoo.com
-// File Last Update Date : November 25, 2022
+//
+//  viewController.swift
+//  iPose
+//
+//  Created by Ghasem Abdi on 2022-06-15.
+//
 
 import UIKit
 import CoreMotion
 
 class ViewController: UIViewController, UITextFieldDelegate {
-    @IBOutlet weak var IPTextField: UITextField!
-    @IBOutlet weak var rateTextField: UITextField!
-    @IBOutlet weak var connectButton: UIButton!
     @IBOutlet weak var stopButton: UIButton!
     @IBOutlet weak var responseLabel: UILabel!
+    @IBOutlet weak var connectButton: UIButton!
+    @IBOutlet weak var IPTextField: UITextField!
+    @IBOutlet weak var rateTextField: UITextField!
     
     var timer: Timer!
-    var labelText = ""
-    var gyro_data: [Double] = []
-    var accl_data: [Double] = []
-    
+    var responseLabelText = ""
     let motion = CMMotionManager()
-    
-    struct motionData: Codable {
-        let gyroData: [Double]
-        let acclData: [Double]
-    }
     
     @IBAction func connectButtonAction(_ sender: Any) {
         let IP = "http://" + IPTextField.text! + "/"
         let rate = Double(rateTextField.text!) ?? 30.0
         
-        // Verify that the gyroscopes and accelerometers are available to be used
+        // Verify that the gyroscopes and accelerometers are available
         if motion.isGyroAvailable && motion.isAccelerometerAvailable {
             motion.gyroUpdateInterval = 1.0 / rate
             motion.accelerometerUpdateInterval = 1.0 / rate
             
-            // Start the delivery of rotation and acceleration data
+            // Start the delivery of rotation and acceleration
             motion.startGyroUpdates()
             motion.startAccelerometerUpdates()
             
             // Configure a timer to fetch the rotation and acceleration data
             timer = Timer(fire: Date(), interval: (1.0/rate), repeats: true, block: { [self] (timer) in
+                let messageData = NSMutableData()
+                
                 // Get the gyroscope data
+                messageData.append("gyro".data(using: .ascii)!)
                 if let gyro = motion.gyroData {
-                    gyro_data = [gyro.timestamp, gyro.rotationRate.x, gyro.rotationRate.y, gyro.rotationRate.z]
+                    messageData.append(withUnsafeBytes(of: gyro.rotationRate.x) { Data($0) })
+                    messageData.append(withUnsafeBytes(of: gyro.rotationRate.y) { Data($0) })
+                    messageData.append(withUnsafeBytes(of: gyro.rotationRate.z) { Data($0) })
                 }
-                
+
                 // Get the accelerometer data
+                messageData.append("accl".data(using: .ascii)!)
                 if let accl = motion.accelerometerData {
-                    accl_data = [accl.timestamp, accl.acceleration.x, accl.acceleration.y, accl.acceleration.z]
+                    messageData.append(withUnsafeBytes(of: accl.acceleration.x) { Data($0) })
+                    messageData.append(withUnsafeBytes(of: accl.acceleration.y) { Data($0) })
+                    messageData.append(withUnsafeBytes(of: accl.acceleration.z) { Data($0) })
                 }
                 
-                // Preparing JSON data for upload
-                let motion_data = motionData(gyroData: gyro_data,
-                                             acclData: accl_data)
-                
-                guard let uploadData = try? JSONEncoder().encode(motion_data) else {
-                    return
-                }
-                
+                // Compress the message data
+                let compressedMessageData = (try? messageData.compressed(using: .lzfse))!
+
                 // Configure an upload request
                 let url = URL(string: IP)!
                 var request = URLRequest(url: url)
                 request.httpMethod = "POST"
-                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                request.httpBody = compressedMessageData as Data
                 
-                // Create and start an upload task
-                let task = URLSession.shared.uploadTask(with: request, from: uploadData) { data, response, error in
+                // Create and start a data task
+                let task = URLSession.shared.dataTask(with: request) { [self] data, response, error in
                     if let error = error {
-                        print ("error: \(error)")
-                        self.labelText = "Could not connect to the server."
+                        print ("Server Error: \(error)")
+                        self.responseLabelText = "Server Error ..."
                         return
                     }
-                    guard let response = response as? HTTPURLResponse,
-                        (200...299).contains(response.statusCode) else {
-                        print ("server error")
-                        self.labelText = "Could not connect to the server."
+                    guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
+                        print ("Server Error: ...")
+                        self.responseLabelText = "Server Error ..."
                         return
                     }
-                    if let mimeType = response.mimeType,
-                        mimeType == "application/json",
-                        let data = data,
-                        let dataString = String(data: data, encoding: .utf8) {
-                        print ("got data: \(dataString)")
-                        self.labelText = "Connected to the server."
+                    if let mimeType = httpResponse.mimeType, mimeType == "text/html" {
+                        print("Sent Message ...")
+                        self.responseLabelText = "Connected to the Server ..."
                     }
                 }
-                
                 task.resume()
-                responseLabel.text = self.labelText
+                responseLabel.text = self.responseLabelText
             })
             
             // Add the timer to the current run loop.
             RunLoop.current.add(timer!, forMode: RunLoop.Mode.default)
+        }
+        else {
+            responseLabel.text = "Unsupported Device ..."
         }
     }
     
@@ -98,11 +95,12 @@ class ViewController: UIViewController, UITextFieldDelegate {
             timer?.invalidate()
             timer = nil
             
+            // Stop the delivery of rotation and acceleration
             motion.stopGyroUpdates()
             motion.stopAccelerometerUpdates()
             
-            if self.labelText == "Connected to the server." {
-                responseLabel.text = "Disconnected from the server."
+            if responseLabel.text == "Connected to the Server ..." {
+                responseLabel.text = "Disconnected from the Server ..."
             }
         }
     }
@@ -110,11 +108,11 @@ class ViewController: UIViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        stopButton.layer.cornerRadius = 15
         IPTextField.layer.cornerRadius = 15
         rateTextField.layer.cornerRadius = 15
         connectButton.layer.cornerRadius = 15
-        stopButton.layer.cornerRadius = 15
-
+        
         IPTextField.attributedPlaceholder = NSAttributedString(string:"Server IP Address", attributes: [NSAttributedString.Key.foregroundColor : UIColor.lightGray])
         rateTextField.attributedPlaceholder = NSAttributedString(string:"Frequency Rate", attributes: [NSAttributedString.Key.foregroundColor : UIColor.lightGray])
         
