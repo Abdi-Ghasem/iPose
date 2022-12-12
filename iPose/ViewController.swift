@@ -15,6 +15,26 @@ class ViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var IPTextField: UITextField!
     @IBOutlet weak var rateTextField: UITextField!
     
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        self.view.endEditing(true)
+        return false
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        stopButton.layer.cornerRadius = 15
+        IPTextField.layer.cornerRadius = 15
+        rateTextField.layer.cornerRadius = 15
+        connectButton.layer.cornerRadius = 15
+        
+        IPTextField.attributedPlaceholder = NSAttributedString(string:"Server IP Address", attributes: [NSAttributedString.Key.foregroundColor : UIColor.lightGray])
+        rateTextField.attributedPlaceholder = NSAttributedString(string:"Frequency Rate", attributes: [NSAttributedString.Key.foregroundColor : UIColor.lightGray])
+        
+        self.IPTextField.delegate = self
+        self.rateTextField.delegate = self
+    }
+    
     var timer: Timer!
     var responseLabelText = ""
     let motion = CMMotionManager()
@@ -65,17 +85,17 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 let task = URLSession.shared.dataTask(with: request) { [self] data, response, error in
                     if let error = error {
                         print ("Server Error: \(error)")
-                        self.responseLabelText = "Server Error ..."
+                        self.responseLabelText = "RYANotics: Server Error ..."
                         return
                     }
                     guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
                         print ("Server Error: ...")
-                        self.responseLabelText = "Server Error ..."
+                        self.responseLabelText = "RYANotics: Server Error ..."
                         return
                     }
                     if let mimeType = httpResponse.mimeType, mimeType == "text/html" {
                         print("Sent Message ...")
-                        self.responseLabelText = "Connected to the Server ..."
+                        self.responseLabelText = "RYANotics: Connected to the Server ..."
                     }
                 }
                 task.resume()
@@ -86,7 +106,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
             RunLoop.current.add(timer!, forMode: RunLoop.Mode.default)
         }
         else {
-            responseLabel.text = "Unsupported Device ..."
+            responseLabel.text = "RYANotics: Unsupported Device ..."
         }
     }
     
@@ -99,29 +119,9 @@ class ViewController: UIViewController, UITextFieldDelegate {
             motion.stopGyroUpdates()
             motion.stopAccelerometerUpdates()
             
-            if responseLabel.text == "Connected to the Server ..." {
-                responseLabel.text = "Disconnected from the Server ..."
+            if responseLabel.text == "RYANotics: Connected to the Server ..." {
+                responseLabel.text = "RYANotics: Disconnected from the Server ..."
             }
         }
-    }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        stopButton.layer.cornerRadius = 15
-        IPTextField.layer.cornerRadius = 15
-        rateTextField.layer.cornerRadius = 15
-        connectButton.layer.cornerRadius = 15
-        
-        IPTextField.attributedPlaceholder = NSAttributedString(string:"Server IP Address", attributes: [NSAttributedString.Key.foregroundColor : UIColor.lightGray])
-        rateTextField.attributedPlaceholder = NSAttributedString(string:"Frequency Rate", attributes: [NSAttributedString.Key.foregroundColor : UIColor.lightGray])
-        
-        self.IPTextField.delegate = self
-        self.rateTextField.delegate = self
-    }
-    
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        self.view.endEditing(true)
-        return false
     }
 }
