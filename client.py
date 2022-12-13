@@ -1,7 +1,8 @@
 # Original Author       : Ghasem Abdi, ghasem.abdi@yahoo.com
-# File Last Update Date : December 12, 2022
+# File Last Update Date : December 13, 2022
 
 # Import dependencies
+import os
 import csv
 import struct
 import liblzfse
@@ -13,7 +14,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 
-# Define a custom class for writing iSensors in a csv file
+# Define a custom class for writing motion data in a csv file
 class write2csv():
     def __init__(self, filename, header):
         self.filename = filename
@@ -34,49 +35,89 @@ class write2csv():
 # Define a custom function for real-time plotting
 def animate(i):
     # Read the csv file
-    iSensors = pd.read_csv('iSensors.csv')
+    with open('motion.csv') as fp:
+        for (nrows, _) in enumerate(fp, 1):
+            pass
 
-    # Extract iSensors
-    idx = iSensors['idx']
-    r_x, r_y, r_z = iSensors['r_x'], iSensors['r_y'], iSensors['r_z']
-    a_x, a_y, a_z = iSensors['a_x'], iSensors['a_y'], iSensors['a_z']
+    # Extract motion data
+    motion = pd.read_csv('motion.csv', skiprows=list(
+        range(1, max((nrows-1)-125, 0))))
+    idx = motion['idx']
+    r_x, r_y, r_z = motion['r_x'], motion['r_y'], motion['r_z']
+    a_x, a_y, a_z = motion['a_x'], motion['a_y'], motion['a_z']
 
     # Plot raw gyroscope
-    axs[0].clear()
-    axs[0].plot(idx, r_x, color='r', label='x')
-    axs[0].plot(idx, r_y, color='g', label='y')
-    axs[0].plot(idx, r_z, color='b', label='z')
+    axs[0][0].clear()
+    axs[0][0].plot(idx, r_x, color='r', label='x')
+    axs[0][0].plot(idx, r_y, color='g', label='y')
+    axs[0][0].plot(idx, r_z, color='b', label='z')
 
-    axs[0].grid()
-    axs[0].set_xticklabels([])
-    axs[0].set_ylim([-2.5*np.pi, 2.5*np.pi])
-    axs[0].legend(loc='upper right')
-    axs[0].set_title('Rotation Rate (rad/s)', loc='left')
-    axs[0].set_xlim([max(len(idx)-125, 0), len(idx)+125])
+    axs[0][0].grid()
+    axs[0][0].set_xticklabels([])
+    axs[0][0].tick_params(left=False)
+    axs[0][0].tick_params(bottom=False)
+    axs[0][0].set_ylim([-2.5*np.pi, 2.5*np.pi])
+    axs[0][0].legend(loc='upper right')
+    axs[0][0].set_title('Rotation Rate (rad/s)', loc='left')
+    axs[0][0].set_xlim([max((nrows-1)-125, 0), (nrows-1)+125])
 
-    axs[1].clear()
-    axs[1].plot(idx, a_x, color='r', label='x')
-    axs[1].plot(idx, a_y, color='g', label='y')
-    axs[1].plot(idx, a_z, color='b', label='z')
+    # Plot raw accelerometer
+    axs[1][0].clear()
+    axs[1][0].plot(idx, a_x, color='r', label='x')
+    axs[1][0].plot(idx, a_y, color='g', label='y')
+    axs[1][0].plot(idx, a_z, color='b', label='z')
 
-    axs[1].grid()
-    axs[1].set_xticklabels([])
-    axs[1].set_ylim([-np.pi/2.5, np.pi/2.5])
-    axs[1].legend(loc='upper right')
-    axs[1].set_title('Acceleration (m/s)', loc='left')
-    axs[1].set_xlim([max(len(idx)-125, 0), len(idx)+125])
+    axs[1][0].grid()
+    axs[1][0].set_xticklabels([])
+    axs[1][0].tick_params(left=False)
+    axs[1][0].tick_params(bottom=False)
+    axs[1][0].set_ylim([-np.pi/2.5, np.pi/2.5])
+    axs[1][0].legend(loc='upper right')
+    axs[1][0].set_title('Acceleration (m/s)', loc='left')
+    axs[1][0].set_xlim([max((nrows-1)-125, 0), (nrows-1)+125])
+
+    # Extract and plot depth map
+    try:
+        depth = plt.imread('depth.tiff')
+
+        axs[0][1].clear()
+        axs[0][1].imshow(depth)
+    except:
+        pass
+
+    axs[0][1].set_xticklabels([])
+    axs[0][1].set_yticklabels([])
+    axs[0][1].tick_params(left=False)
+    axs[0][1].tick_params(bottom=False)
+    axs[0][1].set_title('Depth Map (m)', loc='left')
+
+    # Extract and plot visual image
+    axs[1][1].set_xticklabels([])
+    axs[1][1].set_yticklabels([])
+    axs[1][1].tick_params(left=False)
+    axs[1][1].tick_params(bottom=False)
+    axs[1][1].set_title('Visual Image', loc='left')
 
 
 # Create a socketio client
 idx = count()
 sio = socketio.Client()
 
-# Initiate a figure for plotting iSensors
-fig, axs = plt.subplots(2, 1, figsize=(6, 8))
-fig.canvas.manager.set_window_title('iSensors')
+# Initiate a figure for plotting RYANotics
+fig, axs = plt.subplots(2, 2, figsize=(12, 8))
+fig.canvas.manager.set_window_title('RYANotics')
 
-# Initiate a csv file for writing iSensors
-writeCSV = write2csv('iSensors.csv', header=[
+
+# Remove whatever remains from the previous run
+if os.path.isfile('motion.csv'):
+    os.remove('motion.csv')
+if os.path.isfile('depth.tiff'):
+    os.remove('depth.tiff')
+if os.path.isfile('image.tiff'):
+    os.remove('image.tiff')
+
+# Initiate a csv file for writing mottion data
+writeCSV = write2csv('motion.csv', header=[
                      'idx', 'r_x', 'r_y', 'r_z', 'a_x', 'a_y', 'a_z'])
 
 
@@ -91,13 +132,18 @@ def message(data):
     # Decompress data
     decompressed_data = liblzfse.decompress(data)
 
-    # Decode the received data into iSensors
+    # Decode the received data into RYANotics
     gyro = np.array(struct.unpack('ddd', decompressed_data[decompressed_data.find(
         b'gyro')+4:decompressed_data.find(b'accl')]), dtype=np.double)
-    accl = np.array(struct.unpack(
-        'ddd', decompressed_data[decompressed_data.find(b'accl')+4:]), dtype=np.double)
+    accl = np.array(struct.unpack('ddd', decompressed_data[decompressed_data.find(
+        b'accl')+4:decompressed_data.find(b'dpth')]), dtype=np.double)
     writeCSV.update({'idx': next(idx), 'r_x': gyro[0], 'r_y': gyro[1],
                     'r_z': gyro[2], 'a_x': accl[0], 'a_y': accl[1], 'a_z': accl[2]})
+
+    dpth = np.array(struct.unpack(
+        49152*'f', decompressed_data[decompressed_data.find(b'dpth')+4:]), dtype=np.float32)
+    dpth = np.rot90(dpth.reshape((192, 256)), k=-1)
+    plt.imsave('depth.tiff', dpth, cmap='gray')
 
 
 @sio.event

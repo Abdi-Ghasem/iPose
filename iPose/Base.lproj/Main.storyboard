@@ -16,7 +16,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="50" translatesAutoresizingMaskIntoConstraints="NO" id="Apb-uR-UTA">
-                                <rect key="frame" x="15" y="131.33333333333331" width="400" height="669.33333333333348"/>
+                                <rect key="frame" x="15" y="128.66666666666669" width="400" height="674.66666666666652"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="50" translatesAutoresizingMaskIntoConstraints="NO" id="MPZ-Ah-A1S">
                                         <rect key="frame" x="0.0" y="0.0" width="400" height="600"/>
@@ -43,7 +43,7 @@
                                                         <textInputTraits key="textInputTraits"/>
                                                     </textField>
                                                     <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="30" placeholder="Frequency Rate" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="jdS-tz-lbL">
-                                                        <rect key="frame" x="0.0" y="70.000000000000057" width="300" height="40"/>
+                                                        <rect key="frame" x="0.0" y="69.999999999999943" width="300" height="40"/>
                                                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="300" id="43V-cf-ViM"/>
@@ -54,7 +54,7 @@
                                                         <textInputTraits key="textInputTraits"/>
                                                     </textField>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="W6w-hj-aUK">
-                                                        <rect key="frame" x="50" y="140.00000000000006" width="200" height="40"/>
+                                                        <rect key="frame" x="50" y="139.99999999999994" width="200" height="40"/>
                                                         <color key="backgroundColor" red="0.96078431610000004" green="0.75294119120000003" blue="0.26666668059999998" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="200" id="1YJ-kR-SrF"/>
@@ -70,7 +70,7 @@
                                                         </connections>
                                                     </button>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gnx-qr-pGk">
-                                                        <rect key="frame" x="50" y="210.00000000000006" width="200" height="40"/>
+                                                        <rect key="frame" x="50" y="209.99999999999994" width="200" height="40"/>
                                                         <color key="backgroundColor" red="0.96078431610000004" green="0.75294119120000003" blue="0.26666668059999998" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="200" id="KwQ-ea-8pv"/>
@@ -89,21 +89,14 @@
                                             </stackView>
                                         </subviews>
                                     </stackView>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Ready to Connect to a Server ..." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" enabled="NO" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="67c-jQ-J8Q">
-                                        <rect key="frame" x="0.0" y="650" width="400" height="19.333333333333371"/>
-                                        <fontDescription key="fontDescription" type="system" weight="black" pointSize="16"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="RYANotics: Ready to Connect to a Server ..." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="67c-jQ-J8Q">
+                                        <rect key="frame" x="0.0" y="650" width="400" height="24.666666666666629"/>
+                                        <fontDescription key="fontDescription" name="Impact" family="Impact" pointSize="20"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                 </subviews>
                             </stackView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="RYANotics" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hgU-a2-Lxc">
-                                <rect key="frame" x="166" y="868" width="98" height="30"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" name="Impact" family="Impact" pointSize="24"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" red="0.086274509803921567" green="0.086274509803921567" blue="0.094117647058823528" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

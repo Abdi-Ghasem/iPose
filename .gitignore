@@ -1,2 +1,4 @@
 .DS_Store
-iSensors.csv
+motion.csv
+depth.tiff
+image.tiff
