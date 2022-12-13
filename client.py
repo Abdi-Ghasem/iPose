@@ -4,6 +4,7 @@
 # Import dependencies
 import os
 import csv
+import pickle
 import struct
 import liblzfse
 import socketio
@@ -78,7 +79,9 @@ def animate(i):
 
     # Extract and plot depth map
     try:
-        depth = plt.imread('depth.tiff')
+        f = open('depth.pkl', 'rb')
+        depth = pickle.load(f)
+        f.close()
 
         axs[0][1].clear()
         axs[0][1].imshow(depth)
@@ -111,10 +114,10 @@ fig.canvas.manager.set_window_title('RYANotics')
 # Remove whatever remains from the previous run
 if os.path.isfile('motion.csv'):
     os.remove('motion.csv')
-if os.path.isfile('depth.tiff'):
-    os.remove('depth.tiff')
-if os.path.isfile('image.tiff'):
-    os.remove('image.tiff')
+if os.path.isfile('depth.pkl'):
+    os.remove('depth.pkl')
+if os.path.isfile('image.pkl'):
+    os.remove('image.pkl')
 
 # Initiate a csv file for writing mottion data
 writeCSV = write2csv('motion.csv', header=[
@@ -143,7 +146,9 @@ def message(data):
     dpth = np.array(struct.unpack(
         49152*'f', decompressed_data[decompressed_data.find(b'dpth')+4:]), dtype=np.float32)
     dpth = np.rot90(dpth.reshape((192, 256)), k=-1)
-    plt.imsave('depth.tiff', dpth, cmap='gray')
+    f = open('depth.pkl', 'wb')
+    pickle.dump(dpth, f)
+    f.close()
 
 
 @sio.event

@@ -1,4 +1,4 @@
 .DS_Store
 motion.csv
-depth.tiff
-image.tiff
+depth.pkl
+image.pkl
