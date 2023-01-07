@@ -14,11 +14,11 @@
 
 *3 - Create a simple UI for the app with start/stop button (done on November 25th, 2022 via Storyboard and updated on December 13th, 2022).*
 
-*4 - Get iPhone's camera image and depth map (done on December 13th, 2022 via ARSession).*
+*4 - Get iPhone's camera image and depth map (done on December 13th, 2022 via ARSession and updated on January 7th, 2023).*
 
-*5 - Send iPhone's camera image and depth map into Python (done on December 13th, 2022 via POST request).*
+*5 - Send iPhone's camera image and depth map into Python (done on December 13th, 2022 via POST request and updated on January 7th, 2023).*
 
-*6 - Display iPhone's camera image and depth map in Python (done on December 13th, 2022 via matplotlib).*
+*6 - Display iPhone's camera image and depth map in Python (done on December 13th, 2022 via matplotlib and updated on January 7th, 2023).*
 
 *7 - Reconstruct 3D point clouds of iPhone's camera image and depth map in Python.*
 
