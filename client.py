@@ -1,5 +1,5 @@
 # Original Author       : Ghasem Abdi, ghasem.abdi@yahoo.com
-# File Last Update Date : December 13, 2022
+# File Last Update Date : January 07, 2023
 
 # Import dependencies
 import os
@@ -95,6 +95,16 @@ def animate(i):
     axs[0][1].set_title('Depth Map (m)', loc='left')
 
     # Extract and plot visual image
+    try:
+        f = open('image.pkl', 'rb')
+        image = pickle.load(f)
+        f.close()
+
+        axs[1][1].clear()
+        axs[1][1].imshow(image)
+    except:
+        pass
+
     axs[1][1].set_xticklabels([])
     axs[1][1].set_yticklabels([])
     axs[1][1].tick_params(left=False)
@@ -143,12 +153,22 @@ def message(data):
     writeCSV.update({'idx': next(idx), 'r_x': gyro[0], 'r_y': gyro[1],
                     'r_z': gyro[2], 'a_x': accl[0], 'a_y': accl[1], 'a_z': accl[2]})
 
-    dpth = np.array(struct.unpack(
-        49152*'f', decompressed_data[decompressed_data.find(b'dpth')+4:]), dtype=np.float32)
+    dpth = np.array(struct.unpack(49152*'f', decompressed_data[decompressed_data.find(
+        b'dpth')+4:decompressed_data.find(b'visl')]), dtype=np.float32)
     dpth = np.rot90(dpth.reshape((192, 256)), k=-1)
     f = open('depth.pkl', 'wb')
     pickle.dump(dpth, f)
     f.close()
+
+    visl = np.array(struct.unpack(49152*3*'B', decompressed_data[decompressed_data.find(
+        b'visl')+4:decompressed_data.find(b'camp')]), dtype=np.uint8)
+    visl = np.rot90(visl.reshape((192, 256, 3)), k=-1)
+    f = open('image.pkl', 'wb')
+    pickle.dump(visl, f)
+    f.close()
+
+    camp = np.array(struct.unpack('ffff', decompressed_data[decompressed_data.find(
+        b'camp')+4:]), dtype=np.float32)
 
 
 @sio.event
