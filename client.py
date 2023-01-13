@@ -1,5 +1,5 @@
 # Original Author       : Ghasem Abdi, ghasem.abdi@yahoo.com
-# File Last Update Date : January 12, 2023
+# File Last Update Date : January 13, 2023
 
 # Import dependencies
 import os
@@ -36,6 +36,7 @@ class write2csv():
 # Define a custom class for decoding iPhone data
 class DecodeiPhoneData:
     def __init__(self, iphone_data: bytes):
+        self.__w, self.__h, self.__c = 256, 192, 3
         self.iphone_data = liblzfse.decompress(iphone_data)
 
     def get_motion_sensor(self):
@@ -46,16 +47,14 @@ class DecodeiPhoneData:
         return np.hstack((gyro, accl))
 
     def get_depth_data(self):
-        w, h = 256, 192
-        dpth = np.array(struct.unpack(w*h*'f', self.iphone_data[self.iphone_data.find(
+        dpth = np.array(struct.unpack(self.__w*self.__h*'f', self.iphone_data[self.iphone_data.find(
             b'dpth')+4:self.iphone_data.find(b'visl')]), dtype=np.float32)
-        return np.rot90(dpth.reshape((h, w)), k=-1)
+        return np.rot90(dpth.reshape((self.__h, self.__w)), k=-1)
 
     def get_image_data(self):
-        w, h, c = 256, 192, 3
-        visl = np.array(struct.unpack(w*h*c*'B', self.iphone_data[self.iphone_data.find(
-            b'visl')+4:self.iphone_data.find(b'camp')]), dtype=np.uint8)
-        return np.rot90(visl.reshape((h, w, c)), k=-1)
+        visl = np.array(struct.unpack(self.__w*self.__h*self.__c*'B',
+                        self.iphone_data[self.iphone_data.find(b'visl')+4:self.iphone_data.find(b'camp')]), dtype=np.uint8)
+        return np.rot90(visl.reshape((self.__h, self.__w, self.__c)), k=-1)
 
     def get_camera_intrinsic_matrix(self):
         camp = np.array(struct.unpack(
