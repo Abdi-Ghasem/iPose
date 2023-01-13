@@ -1,5 +1,5 @@
 # Original Author       : Ghasem Abdi, ghasem.abdi@yahoo.com
-# File Last Update Date : January 07, 2023
+# File Last Update Date : January 12, 2023
 
 # Import dependencies
 import os
@@ -31,6 +31,51 @@ class write2csv():
         with open(self.filename, 'a') as csvFile:
             csvWriter = csv.DictWriter(csvFile, fieldnames=self.header)
             csvWriter.writerow(info)
+
+
+# Define a custom class for decoding iPhone data
+class DecodeiPhoneData:
+    def __init__(self, iphone_data: bytes):
+        self.iphone_data = liblzfse.decompress(iphone_data)
+
+    def get_motion_sensor(self):
+        gyro = np.array(struct.unpack('ddd', self.iphone_data[self.iphone_data.find(
+            b'gyro')+4:self.iphone_data.find(b'accl')]), dtype=np.double)
+        accl = np.array(struct.unpack('ddd', self.iphone_data[self.iphone_data.find(
+            b'accl')+4:self.iphone_data.find(b'dpth')]), dtype=np.double)
+        return np.hstack((gyro, accl))
+
+    def get_depth_data(self):
+        w, h = 256, 192
+        dpth = np.array(struct.unpack(w*h*'f', self.iphone_data[self.iphone_data.find(
+            b'dpth')+4:self.iphone_data.find(b'visl')]), dtype=np.float32)
+        return np.rot90(dpth.reshape((h, w)), k=-1)
+
+    def get_image_data(self):
+        w, h, c = 256, 192, 3
+        visl = np.array(struct.unpack(w*h*c*'B', self.iphone_data[self.iphone_data.find(
+            b'visl')+4:self.iphone_data.find(b'camp')]), dtype=np.uint8)
+        return np.rot90(visl.reshape((h, w, c)), k=-1)
+
+    def get_camera_intrinsic_matrix(self):
+        camp = np.array(struct.unpack(
+            'ffff', self.iphone_data[self.iphone_data.find(b'camp')+4:]), dtype=np.float32)
+        return np.array([[camp[0], 0, camp[2]], [0, camp[1], camp[3]], [0, 0, 1]])
+
+
+# Define a custom function for writing pkl file
+def write2pkl(filename, file):
+    f = open(filename, 'wb')
+    pickle.dump(file, f)
+    f.close()
+
+
+# Define a custom function for reading pkl file
+def read_pkl(filename):
+    f = open(filename, 'rb')
+    file = pickle.load(f)
+    f.close()
+    return file
 
 
 # Define a custom function for real-time plotting
@@ -79,9 +124,7 @@ def animate(i):
 
     # Extract and plot depth map
     try:
-        f = open('depth.pkl', 'rb')
-        depth = pickle.load(f)
-        f.close()
+        depth = read_pkl('depth.pkl')
 
         axs[0][1].clear()
         axs[0][1].imshow(depth)
@@ -96,9 +139,7 @@ def animate(i):
 
     # Extract and plot visual image
     try:
-        f = open('image.pkl', 'rb')
-        image = pickle.load(f)
-        f.close()
+        image = read_pkl('image.pkl')
 
         axs[1][1].clear()
         axs[1][1].imshow(image)
@@ -141,34 +182,21 @@ def connect():
 
 
 @sio.event
-def message(data):
-    # Decompress data
-    decompressed_data = liblzfse.decompress(data)
+def message(iphone_data):
+    decoder = DecodeiPhoneData(iphone_data)
 
     # Decode the received data into RYANotics
-    gyro = np.array(struct.unpack('ddd', decompressed_data[decompressed_data.find(
-        b'gyro')+4:decompressed_data.find(b'accl')]), dtype=np.double)
-    accl = np.array(struct.unpack('ddd', decompressed_data[decompressed_data.find(
-        b'accl')+4:decompressed_data.find(b'dpth')]), dtype=np.double)
-    writeCSV.update({'idx': next(idx), 'r_x': gyro[0], 'r_y': gyro[1],
-                    'r_z': gyro[2], 'a_x': accl[0], 'a_y': accl[1], 'a_z': accl[2]})
+    motion = decoder.get_motion_sensor()
+    writeCSV.update({'idx': next(idx), 'r_x': motion[0], 'r_y': motion[1],
+                    'r_z': motion[2], 'a_x': motion[3], 'a_y': motion[4], 'a_z': motion[5]})
 
-    dpth = np.array(struct.unpack(49152*'f', decompressed_data[decompressed_data.find(
-        b'dpth')+4:decompressed_data.find(b'visl')]), dtype=np.float32)
-    dpth = np.rot90(dpth.reshape((192, 256)), k=-1)
-    f = open('depth.pkl', 'wb')
-    pickle.dump(dpth, f)
-    f.close()
+    dpth = decoder.get_depth_data()
+    write2pkl('depth.pkl', dpth)
 
-    visl = np.array(struct.unpack(49152*3*'B', decompressed_data[decompressed_data.find(
-        b'visl')+4:decompressed_data.find(b'camp')]), dtype=np.uint8)
-    visl = np.rot90(visl.reshape((192, 256, 3)), k=-1)
-    f = open('image.pkl', 'wb')
-    pickle.dump(visl, f)
-    f.close()
+    visl = decoder.get_image_data()
+    write2pkl('image.pkl', visl)
 
-    camp = np.array(struct.unpack('ffff', decompressed_data[decompressed_data.find(
-        b'camp')+4:]), dtype=np.float32)
+    camp = decoder.get_camera_intrinsic_matrix()
 
 
 @sio.event

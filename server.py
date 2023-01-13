@@ -1,5 +1,5 @@
 # Original Author       : Ghasem Abdi, ghasem.abdi@yahoo.com
-# File Last Update Date : December 12, 2022
+# File Last Update Date : January 12, 2023
 
 from flask import Flask, request
 from flask_socketio import SocketIO, send
@@ -11,10 +11,10 @@ socketio = SocketIO(app)
 
 # Use the route() decorator to tell Flask what URL should trigger our function
 @app.route('/', methods=['POST'])
-def post():
-    data = request.get_data()
-    send(data, namespace='/', broadcast=True)
-    return data, 201
+def get_iphone_data():
+    iphone_data = request.get_data()
+    send(iphone_data, namespace='/', broadcast=True)
+    return iphone_data, 201
 
 
 # Start the web server
