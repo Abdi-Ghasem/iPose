@@ -44,7 +44,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     @IBAction func connectButtonAction(_ sender: Any) {
         let IP = "http://" + IPTextField.text! + "/"
-        let rate = Double(rateTextField.text!) ?? 20.0
+        let rate = Double(rateTextField.text!) ?? 30.0
         
         // Verify that the gyroscopes, accelerometers, and LiDAR are available
         if motion.isGyroAvailable && motion.isAccelerometerAvailable && ARWorldTrackingConfiguration.supportsFrameSemantics([.sceneDepth, .smoothedSceneDepth]) {
