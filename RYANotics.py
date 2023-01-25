@@ -1,5 +1,5 @@
 # Original Author       : Ghasem Abdi, ghasem.abdi@yahoo.com
-# File Last Update Date : January 24, 2023
+# File Last Update Date : January 25, 2023
 
 
 import struct
@@ -34,58 +34,59 @@ class DecodeiPhoneData:
     def get_camera_intrinsic_matrix(self):
         camp = np.array(struct.unpack('ffff', self.iphone_data[self.iphone_data.find(b'camp')+4:]), dtype=np.float32)
         return o3d.camera.PinholeCameraIntrinsic(self.__w, self.__h, camp[0], camp[1], camp[2], camp[3])
-    
+
     def get_colored_point_clouds(self, extrinsic=np.eye(4), depth_trunc=5.0):
         rgbd = o3d.geometry.RGBDImage.create_from_color_and_depth(self.get_image_data(), self.get_depth_data(), depth_scale=1.0, depth_trunc=depth_trunc, convert_rgb_to_intensity=False)
         return o3d.geometry.PointCloud.create_from_rgbd_image(rgbd, self.get_camera_intrinsic_matrix(), extrinsic=extrinsic)
 
 
-class RYANotics():
-    def __init__(self):
-        pass
-    
-    def run_server(self, q, host='0.0.0.0', port=5000, debug=False):
-        # Create a Flask instance
-        app = Flask('RYANotics')
+def run_server(q, host='0.0.0.0', port=5000, debug=False):
+    # Create a Flask instance
+    app = Flask('RYANotics')
+
+    # Use the route() decorator to tell Flask what URL should trigger our function
+    @app.route('/', methods=['POST'])
+    def get_iphone_data():
+        iphone_data = request.get_data()
+        q.put(iphone_data)
+        return iphone_data, 201
         
-        # Use the route() decorator to tell Flask what URL should trigger our function
-        @app.route('/', methods=['POST'])
-        def get_iphone_data():
-            iphone_data = request.get_data()
-            q.put(iphone_data)
-            return iphone_data, 201
+    @app.route('/shutdown', methods=['POST'])
+    def shutdown_server():
+        q.put('quit')
+        return '', 201
         
-        # Start the web server
-        app.run(host=host, port=port, debug=debug)
-    
-    def run_client(self, q):        
-        vis = o3d.visualization.Visualizer()
-        vis.create_window(window_name='RYANotics')
-        
-        while True:
-            if not q.empty():
-                iphone_data = q.get()
-                
-                try:
-                    pcd = DecodeiPhoneData(iphone_data).get_colored_point_clouds()
-                    pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]])
-                
-                    vis.clear_geometries()
-                    vis.add_geometry(pcd)
-                    vis.poll_events()
-                    vis.update_renderer()
-                except:
-                    print('RYANotics: DID NOT RECEIVE DATA FROM THE WEB SERVER ...')
-    
+    # Start the web server
+    app.run(host=host, port=port, debug=debug)
+
+
 if __name__ == '__main__':
     q = mp.Queue()
+
+    p = mp.Process(target=run_server, args=(q, '0.0.0.0', 5000, False))
+    p.start()
     
-    mp_1 = mp.Process(target=RYANotics().run_server, args=(q, '0.0.0.0', 5000, False))
-    mp_1.start()
+    vis = o3d.visualization.Visualizer()
+    vis.create_window(window_name='RYANotics')
     
-    mp_2 = mp.Process(target=RYANotics().run_client, args=(q, ))
-    mp_2.start()
+    while True:
+        iphone_data = q.get()
+        
+        if iphone_data == 'quit':
+            break
+
+        try:
+            pcd = DecodeiPhoneData(iphone_data).get_colored_point_clouds()
+            pcd.transform([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]])
+
+            vis.clear_geometries()
+            vis.add_geometry(pcd)
+            vis.poll_events()
+            vis.update_renderer()
+
+        except:
+            print('RYANotics: DID NOT RECEIVE DATA FROM THE WEB SERVER ...')
     
-    mp_1.join()
-    mp_2.join()
+    vis.destroy_window()
+    p.terminate()
     

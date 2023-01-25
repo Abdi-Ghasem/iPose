@@ -147,6 +147,15 @@ class ViewController: UIViewController, UITextFieldDelegate {
             if responseLabel.text == "RYANotics: Connected to the Server ..." {
                 responseLabel.text = "RYANotics: Disconnected from the Server ..."
             }
+            
+            // Configure a shut down request for the server
+            let IP = "http://" + IPTextField.text! + "/shutdown"
+            let url = URL(string: IP)!
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            
+            let task = URLSession.shared.dataTask(with: request)
+            task.resume()
         }
     }
     
