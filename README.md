@@ -20,7 +20,7 @@
 
 *6 - Display iPhone's camera image and depth map in Python (done on December 13th, 2022 via matplotlib and updated on January 7th, 2023).*
 
-*7 - Reconstruct 3D point clouds of iPhone's camera image and depth map in Python.*
+*7 - Reconstruct 3D point clouds of iPhone's camera image and depth map in Python (done on January 25th, 2023 via open3d and multiprocessing).*
 
 *8 - Develop visual/LiDAR-aided 3D mapping system in Python.*
 
