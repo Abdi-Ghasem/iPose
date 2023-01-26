@@ -159,7 +159,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
             
             sleep(1)
             
-            exit(-1)
+            exit(0)
         }
     }
     
