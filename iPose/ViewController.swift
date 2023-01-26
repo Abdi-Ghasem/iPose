@@ -156,6 +156,10 @@ class ViewController: UIViewController, UITextFieldDelegate {
             
             let task = URLSession.shared.dataTask(with: request)
             task.resume()
+            
+            sleep(1)
+            
+            exit(-1)
         }
     }
     
