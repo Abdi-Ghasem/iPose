@@ -28,4 +28,4 @@
 
 *10 - Develop image/point cloud understanding/translation (multi-tasking) in Python.*
 
-https://user-images.githubusercontent.com/103428403/211355145-476b22f7-0f80-475b-ae23-dfbed93c0a7a.mov
+https://user-images.githubusercontent.com/103428403/215290686-4db54d09-eee5-4f0b-a6bf-3368aea9e5a0.mov
