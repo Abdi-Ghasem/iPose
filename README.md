@@ -29,3 +29,15 @@
 *10 - Develop image/point cloud understanding/translation (multi-tasking) in Python.*
 
 https://user-images.githubusercontent.com/103428403/215290686-4db54d09-eee5-4f0b-a6bf-3368aea9e5a0.mov
+
+**How to cite?**
+```
+@misc{Abdi-Ghasem/iPose,
+  title={iPose},
+  author={Abdi, Ghasem},
+  publisher={GitHub},
+  journal={GitHub repository},
+  howpublished={\url{https://github.com/Abdi-Ghasem/iPose}},
+  year={2023}
+}
+```
